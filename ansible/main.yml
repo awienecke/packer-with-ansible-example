@@ -1,0 +1,10 @@
+---
+- name: import the nginx role
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+  - name: import role
+    include_role:
+      name: nginx
+

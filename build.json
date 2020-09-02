@@ -1,0 +1,47 @@
+{
+  "variables": {
+    "iso": "http://mirror.dal.nexril.net/centos/7.8.2003/isos/x86_64/CentOS-7-x86_64-Minimal-2003.iso",
+    "checksum": "659691c28a0e672558b003d223f83938f254b39875ee7559d1a4a14c79173193"
+  },
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "iso_url": "{{ user `iso` }}",
+      "iso_checksum": "{{ user `checksum` }}",
+      "iso_checksum_type": "sha256",
+      "vm_name": "Cent7VM",
+      "guest_os_type": "centos-64",
+      "ssh_username": "centos",
+      "ssh_password": "openlickedbookcorner",
+      "ssh_port": 22,
+      "ssh_timeout": "60000s",
+      "ssh_wait_timeout": "60000s",
+      "vmx_data": {
+        "memsize": "1024",
+        "numvcpus": "2",
+        "ethernet0.connectionType": "nat",
+        "cpuid.coresPerSocket": "2",
+        "disk_size": "10240"
+      },
+      "http_directory": "kickstart",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "shutdown_command": "sudo /sbin/halt -p"
+    }
+    
+  ],
+  "provisioners": [
+    {
+      "type": "ansible-local",
+      "playbook_dir": "ansible",
+      "playbook_file": "ansible/main.yml"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "inline": [ "mkdir VMimage && ovftool output-vmware-iso/Cent7VM.vmx VMimage/Cent7VM.ova" ]
+    }
+  ]
+}
